@@ -1,0 +1,171 @@
+
+public class BinarySearchTree {
+	class Node{
+		int data;//value
+		Node left;//left child
+		Node right;//right child
+		//constructor for data
+		Node(int element){
+			data=element;left=null;right=null;
+		}
+		//constructor for full info
+		Node(int element,Node l,Node r){
+			data=element;left=l;right=r;
+		}
+	}
+	// Root of the Binary Search Tree
+    Node root;
+
+    // Constructor for BinarySearchTree class
+    public BinarySearchTree() {
+        root = null;
+    }
+
+    //Implement Node Insert(Node root, int element) Inserts a new node with the given element into the BST. Assumption: The element is not present in the BST.
+    Node Insert(Node root, int element) {
+        // If the tree/subtree is empty, return a new node
+        if (root == null) {
+            root = new Node(element);
+            return root;
+        }
+
+        // Otherwise, recur down the tree. If element is smaller than root, go to the left subtree
+        if (element < root.data) {
+            root.left = Insert(root.left, element);
+        }
+        // If element is larger than root, go to the right subtree
+        else if (element > root.data) {
+            root.right = Insert(root.right, element);
+        }
+
+        // Return the (unchanged) node pointer
+        return root;
+    }
+
+    // Implement Node Delete(Node root, int element) Removes the node having value 'element' in the Binary Search Tree. Assumption: The element is present in the BST.
+    Node Delete(Node root, int element) {
+        // Base case: If the tree is empty
+        if (root == null) return root;
+
+        // Recur down the tree to find the node to be deleted
+        if (element < root.data) {
+            root.left = Delete(root.left, element);
+        } else if (element > root.data) {
+            root.right = Delete(root.right, element);
+        } else {
+            // Node found: If the node is with only one child or no child
+            if (root.left == null) {
+                return root.right;
+            } else if (root.right == null) {
+                return root.left;
+            }
+
+            // Node with two children: Get the inorder successor (smallest in the right subtree)
+            root.data = minValue(root.right);
+
+            // Delete the inorder successor
+            root.right = Delete(root.right, root.data);
+        }
+
+        return root;
+    }
+
+    // Helper function to find the minimum value in a subtree (used for Delete)
+    int minValue(Node root) {
+        int minv = root.data;
+        while (root.left != null) {
+            minv = root.left.data;
+            root = root.left;
+        }
+        return minv;
+    }
+
+    // Implement a Boolean isBST(Node root) Checks if the given tree is a valid BST or not. Uses a helper function to check valid ranges for keys.
+    Boolean isBST(Node root) {
+        // We use Long.MIN_VALUE and MAX_VALUE to represent -infinity and +infinity
+        return isBSTUtil(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    // Helper function for isBST. Returns true if the given tree is a BST and its values are >= min and <= max.
+    boolean isBSTUtil(Node node, long min, long max) {
+        // An empty tree is a valid BST
+        if (node == null)
+            return true;
+
+        // If the current node violates the min/max constraint, return false
+        if (node.data <= min || node.data >= max)
+            return false;
+
+        // Recursively check the subtrees with updated min/max constraints
+        // Left child must be smaller than the current node
+        // Right child must be larger than the current node
+        return isBSTUtil(node.left, min, node.data) &&
+               isBSTUtil(node.right, node.data, max);
+    }
+
+    //inOrderTraversal(Node root)
+    void inOrderTraversal(Node root) {
+        if (root != null) {
+            // First recur on left child
+            inOrderTraversal(root.left);
+            // Then print the data of node
+            System.out.print(root.data + " ");
+            // Now recur on right child
+            inOrderTraversal(root.right);
+        }
+    }
+
+    //Main method
+    public static void main(String[] args) {
+        BinarySearchTree tree = new BinarySearchTree();
+
+        // Image structure: Root 40, Left 30, Right 50. 
+        // 30 has children 25, 35. 50 has children 45, 60.
+        System.out.println("Binary Tree at given Image");
+        
+        // We insert 40 first to make it the root
+        tree.root = tree.Insert(tree.root, 40);
+        
+        // Insert Level 2
+        tree.root = tree.Insert(tree.root, 30);
+        tree.root = tree.Insert(tree.root, 50);
+        
+        // Insert Level 3
+        tree.root = tree.Insert(tree.root, 25);
+        tree.root = tree.Insert(tree.root, 35);
+        tree.root = tree.Insert(tree.root, 45);
+        tree.root = tree.Insert(tree.root, 60);
+        
+        // Test 1: InOrder Traversal (Should be sorted: 25 30 35 40 45 50 60)
+        System.out.println("\nTesting InOrder Traversal...");
+        System.out.print("Inorder traversal of the given tree: ");
+        tree.inOrderTraversal(tree.root);
+        System.out.println();
+
+        // Test 2: isBST
+        System.out.println("\nTesting isBST...");
+        if (tree.isBST(tree.root)) {
+            System.out.println("IS BST: True (The tree is a valid Binary Search Tree)");
+        } else {
+            System.out.println("IS BST: False (The tree is NOT a valid Binary Search Tree)");
+        }
+
+        // Test 3: Delete
+        // We will delete 30 (a node with two children: 25 and 35) to test complex deletion
+        System.out.println("\nTesting Delete (Deleting Node 30)...");
+        tree.root = tree.Delete(tree.root, 30);
+        
+        System.out.print("Inorder traversal after deleting 30: ");
+        tree.inOrderTraversal(tree.root); // Expected: 25 35 40 45 50 60
+        System.out.println();
+        
+        // Test 4: Delete Leaf
+        // We will delete 60
+        System.out.println("\nTesting Delete (Deleting Leaf Node 60)...");
+        tree.root = tree.Delete(tree.root, 60);
+
+        System.out.print("Inorder traversal after deleting 60: ");
+        tree.inOrderTraversal(tree.root); // Expected: 25 35 40 45 50
+        System.out.println();
+    }
+}
